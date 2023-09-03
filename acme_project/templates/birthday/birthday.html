@@ -1,9 +1,54 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
 
 {% block content %}
-    <form>
-        {{ form.as_p }}
+    {% with data=form.instance %}
+        {% if "/edit/" in request.path %}
+            <h1>Редактировать запись {{ data.pk }}</h1>
+        {% elif "/delete/" in request.path %}
+            <h1>Удалить запись {{ data.pk }}</h1>
+        {% else %}
+            <h1>Создать запись</h1>
+        {% endif %}
+        {% if "/delete/" in request.path %}
+            <div class="card col-4 mx-auto">
+                <div class="card-header">
+                    Запись {{ data.id }}
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <h1>{{ data.first_name }} {{ data.last_name }}</h1>
+                        <p>{{ data.birthday }}</p>
+                        {% bootstrap_button button_type="submit" content="Отправить" %}
+                    </form>
 
-        <input type="submit" value="Submit">
-    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="card col-4 mx-auto">
+                <div class="card-header">
+                    Калькулятор ожидания дня рождения
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% bootstrap_form form %}
+                        {% bootstrap_button button_type="submit" content="Отправить" %}
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if form.is_valid %}
+            ID новой записи в БД: {{ data.id }}
+            <hr>
+            <h2>Привет, {{ data.first_name }} {{ data.last_name }}</h2>
+            {% if birthday_countdown == 0 %}
+                С днём рождения!
+            {% else %}
+                Осталось дней до дня рождения: {{ birthday_countdown }}!
+            {% endif %}
+        {% endif %}
+    {% endwith %}
 {% endblock %}
