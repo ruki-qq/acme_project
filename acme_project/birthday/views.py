@@ -1,7 +1,9 @@
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView, UpdateView
+)
 
 from .forms import BirthdayForm
 from .models import Birthday
@@ -10,20 +12,25 @@ from .utils import calculate_birthday_countdown
 
 class BirthdayMixin:
     model = Birthday
-    success_url = reverse_lazy('birthday:list')
 
 
-class BirthdayFormMixin:
+class BirthdayDetailView(DetailView):
+    model = Birthday
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['birthday_countdown'] = calculate_birthday_countdown(
+            self.object.birthday
+        )
+        return context
+
+
+class BirthdayCreateView(BirthdayMixin, CreateView):
     form_class = BirthdayForm
-    template_name = 'birthday/birthday.html'
 
 
-class BirthdayCreateView(BirthdayMixin, BirthdayFormMixin, CreateView):
-    pass
-
-
-class BirthdayUpdateView(BirthdayMixin, BirthdayFormMixin, UpdateView):
-    pass
+class BirthdayUpdateView(BirthdayMixin, UpdateView):
+    form_class = BirthdayForm
 
 
 class BirthdayDeleteView(BirthdayMixin, DeleteView):
@@ -49,7 +56,7 @@ def birthday(request, pk=None):
         )
         context.update({'birthday_countdown': birthday_countdown})
 
-    return render(request, 'birthday/birthday.html', context)
+    return render(request, 'birthday/birthday_form.html', context)
 
 
 def birthday_list(request):
@@ -68,4 +75,4 @@ def delete_birthday(request, pk):
     if request.method == 'POST':
         instance.delete()
         return redirect('birthday:list')
-    return render(request, 'birthday/birthday.html', context)
+    return render(request, 'birthday/birthday_form.html', context)
