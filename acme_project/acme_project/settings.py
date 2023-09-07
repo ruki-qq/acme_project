@@ -17,9 +17,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_bootstrap5',
     'birthday.apps.BirthdayConfig',
     'pages.apps.PagesConfig',
-    'django_bootstrap5',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +64,8 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'users.MyUser'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -83,6 +86,12 @@ AUTH_PASSWORD_VALIDATORS = [
         ),
     },
 ]
+
+LOGIN_REDIRECT_URL = 'pages:homepage'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
 LANGUAGE_CODE = 'ru-RU'
 
